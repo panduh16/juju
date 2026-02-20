@@ -1,5 +1,3 @@
--- before saying anything pls sybau i didnt try at all and i made ts fast
-warn("starting juju")
 repeat task["wait"]() until game:IsLoaded()
 
 -- > ( luraph variables )
