@@ -394,8 +394,14 @@ do
 			["configs"] = {},
 			["data.dat"] = [[{"notifications":true,"theme":"","favorites":[]}]],
 		}
-		if not isfolder("juju recode") then
-			makefolder("juju recode")
+		if getgenv().custom_folder then
+			if not isfolder(getgenv().custom_folder) then
+				makefolder(getgenv().custom_folder)
+			end
+		else
+			if not isfolder("juju recode") then
+				makefolder("juju recode")
+			end
 		end
 
 		local recursive_check
@@ -416,14 +422,22 @@ do
 			end
 		end
 
-		recursive_check("juju recode/", files)
+		if getgenv().custom_folder then
+			recursive_check(getgenv().custom_folder .. "/", files)
+		else
+			recursive_check("juju recode/", files)
+		end
 	end
 
 	-- > ( custom drawing )
 
 	drawing = Drawing
 	LPH_NO_VIRTUALIZE(function()
-		drawing = _G.FORCE_REAL_DRAWING and Drawing or loadstring(readfile("juju recode/assets/api.lua"))()
+		drawing = _G.FORCE_REAL_DRAWING and Drawing
+			or (
+				getgenv().custom_folder and loadstring(readfile(getgenv().custom_folder .. "/assets/api.lua"))
+				or loadstring(readfile("juju recode/assets/api.lua"))()
+			)
 	end)()
 
 	getgenv()["fake_drawing"] = drawing
@@ -754,7 +768,8 @@ do
 
 	local logo = drawing_proxy["new"]("Image", {
 		["Color"] = menu["colors"]["accent"],
-		["Data"] = readfile("juju recode/assets/logo.png"),
+		["Data"] = getgenv().custom_folder and readfile(getgenv().custom_folder .. "/assets/logo.png")
+			or readfile("juju recode/assets/logo.png"),
 		["Position"] = udim2_new(0, 15, 0, 15),
 		["Parent"] = inside,
 		["Size"] = udim2_new(0, 35, 0, 35),
@@ -946,7 +961,8 @@ do
 
 	local drag_logo = drawing_proxy["new"]("Image", {
 		["Color"] = menu["colors"]["accent"],
-		["Data"] = readfile("juju recode/assets/logo.png"),
+		["Data"] = getgenv().custom_folder and readfile(getgenv().custom_folder .. "/assets/logo.png")
+			or readfile("juju recode/assets/logo.png"),
 		["Position"] = udim2_new(0.5, -40, 0.5, -40),
 		["Parent"] = drag_inside,
 		["Size"] = udim2_new(0, 80, 0, 80),
@@ -1215,7 +1231,8 @@ do
 
 	function menu:load_theme(theme)
 		if theme then
-			local path = "juju recode/themes/" .. theme .. ".th"
+			local path = getgenv().custom_folder and getgenv().custom_folder .. "/themes/" .. theme .. ".th"
+				or "juju recode/themes/" .. theme .. ".th"
 			if isfile(path) then
 				local s, data = pcall(function()
 					return http_service:JSONDecode(readfile(path))
@@ -1746,7 +1763,7 @@ do
 		if menu["saved"] then
 			menu["saved"] = false
 			writefile(
-				"juju recode/data.dat",
+				getgenv().custom_folder and getgenv().custom_folder .. "/data.dat" or "juju recode/data.dat",
 				http_service:JSONEncode({
 					["notifications"] = do_notifications,
 					["favorites"] = menu["favorites"],
@@ -2648,7 +2665,7 @@ do
 					active["parent"]:add_icon(active["drawings"]["text"]["Text"], star)
 
 					writefile(
-						"juju recode/data.dat",
+						getgenv().custom_folder and getgenv().custom_folder .. "/data.dat" or "juju recode/data.dat",
 						http_service:JSONEncode({
 							["notifications"] = do_notifications,
 							["favorites"] = menu["favorites"],
@@ -2678,7 +2695,7 @@ do
 					menu["saved"] = true
 
 					writefile(
-						"juju recode/data.dat",
+						getgenv().custom_folder and getgenv().custom_folder .. "/data.dat" or "juju recode/data.dat",
 						http_service:JSONEncode({
 							["notifications"] = do_notifications,
 							["favorites"] = menu["favorites"],
@@ -2786,7 +2803,7 @@ do
 					active["parent"]:add_icon(active["drawings"]["text"]["Text"], autoload)
 
 					writefile(
-						"juju recode/data.dat",
+						getgenv().custom_folder and getgenv().custom_folder .. "/data.dat" or "juju recode/data.dat",
 						http_service:JSONEncode({
 							["notifications"] = do_notifications,
 							["favorites"] = menu["favorites"],
@@ -2815,7 +2832,7 @@ do
 					active["parent"]:remove_icon(active["drawings"]["text"]["Text"], autoload)
 
 					writefile(
-						"juju recode/data.dat",
+						getgenv().custom_folder and getgenv().custom_folder .. "/data.dat" or "juju recode/data.dat",
 						http_service:JSONEncode({
 							["notifications"] = do_notifications,
 							["favorites"] = menu["favorites"],
@@ -3017,7 +3034,7 @@ do
 		["Color"] = color3_fromrgb(255, 0, 0),
 		["Transparency"] = 1,
 		["Rounding"] = 4,
-		["Data"] = readfile("juju recode/assets/saturation.png"),
+		["Data"] = readfile(getgenv().custom_folder and getgenv().custom_folder .. "/assets/saturation.png" or "juju recode/assets/saturation.png"),
 		["ZIndex"] = 1001,
 		["Visible"] = true,
 	})
@@ -5541,7 +5558,7 @@ do
 						new_options[#new_options + 1] = original_options[i]
 					end
 
-					for _, file in listfiles("juju recode/custom") do
+					for _, file in listfiles(getgenv().custom_folder and getgenv().custom_folder .. "/custom" or "juju recode/custom") do
 						local extension = file:match("%.([^%.]+)$")
 
 						if extension then
@@ -5574,7 +5591,7 @@ do
 							new_options[#new_options + 1] = original_options[i]
 						end
 
-						for _, file in listfiles("juju recode/custom") do
+						for _, file in listfiles(getgenv().custom_folder and getgenv().custom_folder .. "/custom" or "juju recode/custom") do
 							local extension = file:match("%.([^%.]+)$")
 
 							if extension then
@@ -6743,7 +6760,7 @@ do
 		menu.get_config_list = function()
 			local list = {}
 
-			local files = listfiles("juju recode/configs/")
+			local files = listfiles(getgenv().custom_folder and getgenv().custom_folder .. "/configs/" or "juju recode/configs/")
 			for _, file in files do
 				if string["match"](file, "%.(.*)") == "cfg" then
 					list[#list + 1] = string["sub"](file, 21, #file - 4)
@@ -6756,7 +6773,7 @@ do
 		menu.get_addon_list = function()
 			local list = {}
 
-			local files = listfiles("juju recode/addons/")
+			local files = listfiles(getgenv().custom_folder and getgenv().custom_folder .. "/addons/" or "juju recode/addons/")
 			for _, file in files do
 				if string["match"](file, "%.(.*)") == "luau" then
 					list[#list + 1] = string["sub"](file, 20, #file - 5)
@@ -6769,7 +6786,7 @@ do
 		menu.get_skins_list = function()
 			local list = {}
 
-			local files = listfiles("juju recode/custom/")
+			local files = listfiles(getgenv().custom_folder and getgenv().custom_folder .. "/custom/" or "juju recode/custom/")
 			for _, file in files do
 				if string["match"](file, "%.(.*)") == "skin" then
 					list[#list + 1] = string["sub"](file, 20, #file - 5)
@@ -6782,7 +6799,7 @@ do
 		menu.get_theme_list = function()
 			local list = {}
 
-			local files = listfiles("juju recode/themes/")
+			local files = listfiles(getgenv().custom_folder and getgenv().custom_folder .. "/themes/" or "juju recode/themes/")
 			for _, file in files do
 				if string["match"](file, "%.(.*)") == "th" then
 					list[#list + 1] = string["sub"](file, 20, #file - 3)
@@ -6842,7 +6859,7 @@ do
 			end
 
 			writefile(
-				"juju recode/configs/" .. name .. ".cfg",
+				getgenv().custom_folder and getgenv().custom_folder .. "/configs/" .. name .. ".cfg" or "juju recode/configs/" .. name .. ".cfg",
 				encrypt(http_service:JSONEncode(config), "^^^^^^^^^^^^^^^^^^^^")
 			)
 		end)
@@ -6866,7 +6883,7 @@ do
 				return
 			end
 
-			local path = "juju recode/configs/" .. name .. ".cfg"
+			local path = getgenv().custom_folder and getgenv().custom_folder .. "/configs/" .. name .. ".cfg" or "juju recode/configs/" .. name .. ".cfg"
 
 			if isfile(path) then
 				local new_flags = menu["get_config_data"](readfile(path))
@@ -7278,7 +7295,7 @@ do
 			end
 
 			menu["load_addon"] = function(name)
-				local path = "juju recode/addons/" .. name .. ".luau"
+				local path = getgenv().custom_folder and getgenv().custom_folder .. "/addons/" .. name .. ".luau" or "juju recode/addons/" .. name .. ".luau"
 
 				if not isfile(path) then
 					return "file does not exist"
@@ -8304,7 +8321,7 @@ do
 					["button"] = {},
 				})["on_clicked"],
 				function()
-					local file = "juju recode/themes/" .. flags["!name"] .. ".th"
+					local file = getgenv().custom_folder and getgenv().custom_folder .. "/themes/" .. flags["!name"] .. ".th" or "juju recode/themes/" .. flags["!name"] .. ".th"
 					local data = {}
 
 					local elements = theme_section["elements"]
@@ -8462,7 +8479,7 @@ do
 
 			create_connection(config_list["on_selection_change"], function(config)
 				local config = config or "AbbbbAzbbbbA12z"
-				local path = "juju recode/configs/" .. config .. ".cfg"
+				local path = getgenv().custom_folder and getgenv().custom_folder .. "/configs/" .. config .. ".cfg" or "juju recode/configs/" .. config .. ".cfg"
 				local data = nil
 				if isfile(path) then
 					data = menu["get_config_data"](readfile(path))
@@ -8566,7 +8583,7 @@ do
 
 				if selected_config and tostring(selected_config) and #selected_config > 0 then
 					config_list:remove_item(selected_config)
-					delfile("juju recode/configs/" .. selected_config .. ".cfg")
+					delfile(getgenv().custom_folder and getgenv().custom_folder .. "/configs/" .. selected_config .. ".cfg" or "juju recode/configs/" .. selected_config .. ".cfg")
 					menu["new_notification"]("successfully deleted config " .. selected_config, 1)
 				end
 			end)
@@ -8695,7 +8712,7 @@ do
 		-- >> ( data )
 
 		local s, data = pcall(function()
-			return http_service:JSONDecode(readfile("juju recode/data.dat"))
+			return http_service:JSONDecode(readfile(getgenv().custom_folder and getgenv().custom_folder .. "/data.dat" or "juju recode/data.dat"))
 		end)
 
 		if s and data then
@@ -8729,7 +8746,7 @@ do
 			end
 		else
 			writefile(
-				"juju recode/data.dat",
+				getgenv().custom_folder and getgenv().custom_folder .. "/data.dat" or "juju recode/data.dat",
 				http_service:JSONEncode({
 					["notifications"] = do_notifications,
 					["favorites"] = {},
