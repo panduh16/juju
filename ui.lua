@@ -8380,16 +8380,20 @@ do
 		-- >> ( configs )
 
 		function menu:setup_configs(section_name)
+			local config_list, config_info, config_editor = nil, nil, nil
 			if type(section_name) == "string" then
 				local config_tab = menu.create_group(section_name)
 				config_tab:create_tab("configs")
+				config_list =
+					menu["groups"][section_name]:create_panel_section("configs", "config list", 1, false, true)
+				config_info = menu["groups"][section_name]:create_section("configs", "config info", 2, 0.3, 0)
+				config_editor = menu["groups"][section_name]:create_section("configs", "config editor", 2, 0.7, 0.3)
 			else
 				section_name:create_tab("configs")
+				config_list = section_name:create_panel_section("configs", "config list", 1, false, true)
+				config_info = section_name:create_section("configs", "config info", 2, 0.3, 0)
+				config_editor = section_name:create_section("configs", "config editor", 2, 0.7, 0.3)
 			end
-			local config_list =
-				menu["groups"][section_name]:create_panel_section("configs", "config list", 1, false, true)
-			local config_info = menu["groups"][section_name]:create_section("configs", "config info", 2, 0.3, 0)
-			local config_editor = menu["groups"][section_name]:create_section("configs", "config editor", 2, 0.7, 0.3)
 
 			menu_references["config_list"] = config_list
 
