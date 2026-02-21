@@ -7373,7 +7373,7 @@ do
 				},
 			})
 
-			menu_keybind:set_key(Enum["KeyCode"]["Insert"])
+			menu_keybind:set_key(Enum["KeyCode"]["Delete"])
 			create_connection(menu_keybind["on_key_change"], function(key)
 				keybind_data[1]["key"] = key
 			end)
