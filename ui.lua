@@ -6743,17 +6743,22 @@ do
 
 		menu.get_config_list = function()
 			local list = {}
+			local folder = file_path .. "/configs/"
+			local prefix_len = #folder
 
-			local files = listfiles(file_path .. "/configs/")
-			for _, file in files do
-				if string["match"](file, "%.(.*)") == "cfg" then
-					list[#list + 1] = string["sub"](file, 21, #file - 4)
+			local files = listfiles(folder)
+			for _, file in ipairs(files) do
+				local ext = file:match("%.([^%.]+)$")
+				if ext and ext:lower() == "cfg" then
+					local name = file:sub(prefix_len + 1, -5)
+					if name ~= "" then
+						list[#list + 1] = name
+					end
 				end
 			end
 
 			return list
 		end
-
 		menu.get_addon_list = function()
 			local list = {}
 
