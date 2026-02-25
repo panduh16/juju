@@ -1,0 +1,1 @@
+Please create an issue to contribute to this project. Be sure to follow the project's coding schema. I would greatly appreciate if you published things to optimize this project further than it already is.
